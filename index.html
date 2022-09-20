@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+            crossorigin="anonymous"
+        />
+        <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-database.js"></script>
+        <style>
+            .flexContainer {
+                display: flex;
+                justify-content: center;
+            }
+
+            .ledContainer {
+                height: 30px;
+                width: 30px;
+                background-color: rgb(73, 73, 73);
+                border-radius: 25px;
+            }
+
+            .alarmTriggered {
+                height: 30px;
+                width: 30px;
+                background-color: black;
+                border-radius: 25px;
+                display: inline-block;
+                margin-left: 15px;
+            }
+
+            .led {
+                height: 20px;
+                width: 20px;
+
+                background-color: rgb(73, 73, 73);
+                border-radius: 25px;
+                align-self: center;
+            }
+
+            .on {
+                background-color: #f75e5e;
+            }
+
+            h4 {
+                align-self: center;
+                display: inline-block;
+                line-height: 0px;
+            }
+        </style>
+    </head>
+    <body class="container my-5">
+        <div
+            class="flexContainer"
+            style="justify-content: space-between; width: 35%"
+        >
+            <h4 class="my-3">Alarm triggered:</h4>
+            <span class="flexContainer ledContainer">
+                <div id="triggeredLed" class="led"></div>
+            </span>
+        </div>
+
+        <br />
+
+        <div
+            class="flexContainer"
+            style="justify-content: space-between; width: 35%"
+        >
+            <h4 class="my-3">Alarm armed:</h4>
+            <span class="flexContainer ledContainer">
+                <div id="armedLed" class="led"></div>
+            </span>
+        </div>
+
+        <div class="form-group mt-5" style="width: 30%">
+            <label for="password">Enter password for alarm:</label>
+            <input
+                type="password"
+                class="form-control"
+                id="password"
+                placeholder="Password"
+            />
+        </div>
+
+        <button id="enter" type="submit" class="btn btn-primary">Submit</button>
+
+        <div class="form-group mt-5" style="width: 30%">
+            <label for="random">Random value from firebase:</label>
+            <input
+                type="text"
+                readonly
+                class="form-control"
+                id="random"
+                placeholder="Random number"
+            />
+        </div>
+
+        <script type="module">
+            // Your web app's Firebase configuration
+            const firebaseConfig = {
+                apiKey: "",
+                authDomain: "",
+                databaseURL: "",
+                projectId: "",
+                storageBucket: "",
+                messagingSenderId: "",
+                appId: "",
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            // set references to firebase
+            var randomRef = firebase.database().ref("IoT/random");
+            var passwordRef = firebase.database().ref("IoT/Password");
+            var alarmIsActiveRef = firebase.database().ref("IoT/AlarmIsActive");
+            var AlarmIsTriggeredRef = firebase
+                .database()
+                .ref("IoT/AlarmIsTriggered");
+
+            randomRef.on("value", (snapshot) => {
+                let result = snapshot.val();
+                document.getElementById("random").value = result;
+
+                console.log("Random: " + result);
+            });
+
+            alarmIsActiveRef.on("value", (snapshot) => {
+                let result = snapshot.val();
+                let ledElement = document.getElementById("armedLed");
+
+                console.log("Alarm armed: " + snapshot.val());
+
+                if (result && !ledElement.classList.contains("on")) {
+                    ledElement.classList.add("on");
+                } else if (ledElement.classList.contains("on")) {
+                    ledElement.classList.remove("on");
+                }
+            });
+
+            AlarmIsTriggeredRef.on("value", (snapshot) => {
+                let result = snapshot.val();
+                let ledElement = document.getElementById("triggeredLed");
+
+                console.log("Triggered status: " + result);
+
+                if (result && !ledElement.classList.contains("on")) {
+                    ledElement.classList.add("on");
+                } else if (ledElement.classList.contains("on")) {
+                    ledElement.classList.remove("on");
+                }
+            });
+
+            // set onclick event for enter button
+            document
+                .querySelector("#enter")
+                .addEventListener("click", SendPassword);
+
+            document
+                .querySelector("#password")
+                .addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") {
+                        SendPassword();
+                    }
+                });
+
+            // updates firebase password variable
+            function SendPassword() {
+                const password = document.getElementById("password");
+
+                const x = !isNaN(parseInt(password.value))
+                    ? parseInt(password.value)
+                    : -1;
+
+                passwordRef.set(x);
+
+                password.value = "";
+            }
+        </script>
+    </body>
+</html>
