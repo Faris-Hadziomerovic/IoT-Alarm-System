@@ -10,9 +10,6 @@
 #define FIREBASE_API_KEY ""
 #define FIREBASE_DATABASE_URL "" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
 
-//#define WIFI_SSID "Net_578463"
-//#define WIFI_PASSWORD "RLENSOLSQBRLENSOLSQB"
-
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
 
